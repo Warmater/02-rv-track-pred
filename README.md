@@ -81,22 +81,24 @@
 
 **核验日期：2026-10-19；近三年窗口：2023-10-19 至 2026-10-19。** 下列正式版本均发表于 **2024–2026 年**，优先收录高水平期刊与强相关主会论文。期刊、主会、Workshop 分开标注；不收录仅有预印本且未完成正式发表核验的工作。原始技术若有更早预印本，不把正式出版年份误写为首次提出年份。
 
-详细英文原题、出版证据、Zotero 占位、适用限制和调整记录见[项目论文库](论文库.md)。本轮无需为超期算法设置基础论文例外；VoD、TJ4DRadSet 等作为数据资源文档保留，不计入近期方法论文。
+详细英文原题、出版证据、Zotero PDF 链接、适用限制和调整记录见[项目论文库](论文库.md)。本轮无需为超期算法设置基础论文例外；VoD、TJ4DRadSet 等作为数据资源文档保留，不计入近期方法论文。
 
 ### 主线必读
 
-| 方向 | 论文 | 正式发表 | 对项目的具体作用 |
-| --- | --- | --- | --- |
-| 任务框架 | [联合感知与预测综述](https://doi.org/10.1109/TITS.2025.3607743) | T-ITS 2025 · 期刊 | 确定检测、跟踪、预测的接口及误差传递问题。 |
-| 4D 融合检测 | [MSSF](https://ieeexplore.ieee.org/document/10947638/) | T-ITS 2025 · 期刊 | 多阶段点云–图像交互，直接对应 VoD/TJ4DRadSet。 |
-| 4D 融合检测 | [MLF-4DRCNet](https://www.sciencedirect.com/science/article/pii/S1566253526002563) | Information Fusion 2026 · 期刊 | 点、场景、候选框三级融合，作为近期强相关期刊对照。 |
-| 融合检测基线 | [RCBEVDet](https://openaccess.thecvf.com/content/CVPR2024/html/Lin_RCBEVDet_Radar-camera_Fusion_in_Birds_Eye_View_for_3D_Object_CVPR_2024_paper.html) | CVPR 2024 · 主会 | 雷达编码、RCS 与 BEV 对齐，适合建立检测对照。 |
-| 运动特征与融合 | [RaCFormer](https://openaccess.thecvf.com/content/CVPR2025/html/Chu_RaCFormer_Towards_High-Quality_3D_Object_Detection_via_Query-based_Radar-Camera_Fusion_CVPR_2025_paper.html) | CVPR 2025 · 主会 | 深度引导、目标查询、多普勒与历史雷达特征。 |
-| 跟踪与状态估计 | [雷达–相机置信度融合跟踪](https://www.ieee-jas.net/en/article/doi/10.1109/JAS.2025.125405) | IEEE/CAA JAS 2025 · 期刊 | 时间对齐、存在性判断、匹配和融合状态估计。 |
-| 三维身份关联 | [ADA-Track](https://openaccess.thecvf.com/content/CVPR2024/html/Ding_ADA-Track_End-to-End_Multi-Camera_3D_Multi-Object_Tracking_with_Alternating_Detection_and_CVPR_2024_paper.html) | CVPR 2024 · 主会 | 交替检测与关联；原始输入是多相机。 |
-| 多模态轨迹预测 | [MTR++](https://ieeexplore.ieee.org/abstract/document/10398503/) | TPAMI 2024 · 期刊 | 多目标交互和意图查询；不能把 MTR 仓库直接视作完整 MTR++ 实现。 |
-| 预测鲁棒性 | [WAKE](https://ieeexplore.ieee.org/document/10839301) | TPAMI 2025 · 期刊 | 历史观测缺失与运动学约束，适合遮挡/漏检实验。 |
-| 联合任务工程 | [SparseDrive](https://doi.org/10.1109/ICRA55743.2025.11128800) | ICRA 2025 · 主会 | 连接检测、跟踪、预测的实例表示；雷达扩展需另行验证。 |
+以下 PDF 链接已匹配本机 Zotero 个人文库附件；在支持 zotero:// 协议的阅读器中点击即可打开对应 PDF。
+
+| 方向 | 论文 | 正式发表 | 对项目的具体作用 | Zotero PDF |
+| --- | --- | --- | --- | --- |
+| 任务框架 | [联合感知与预测综述](https://doi.org/10.1109/TITS.2025.3607743) | T-ITS 2025 · 期刊 | 确定检测、跟踪、预测的接口及误差传递问题。 | [打开 PDF](zotero://open-pdf/library/items/59CD3R4R) |
+| 4D 融合检测 | [MSSF](https://ieeexplore.ieee.org/document/10947638/) | T-ITS 2025 · 期刊 | 多阶段点云–图像交互，直接对应 VoD/TJ4DRadSet。 | [打开 PDF](zotero://open-pdf/library/items/L2NY8XU3) |
+| 4D 融合检测 | [MLF-4DRCNet](https://www.sciencedirect.com/science/article/pii/S1566253526002563) | Information Fusion 2026 · 期刊 | 点、场景、候选框三级融合，作为近期强相关期刊对照。 | [打开 PDF](zotero://open-pdf/library/items/T2SV6UUH) |
+| 融合检测基线 | [RCBEVDet](https://openaccess.thecvf.com/content/CVPR2024/html/Lin_RCBEVDet_Radar-camera_Fusion_in_Birds_Eye_View_for_3D_Object_CVPR_2024_paper.html) | CVPR 2024 · 主会 | 雷达编码、RCS 与 BEV 对齐，适合建立检测对照。 | [打开 PDF](zotero://open-pdf/library/items/TWSUWHPH) |
+| 运动特征与融合 | [RaCFormer](https://openaccess.thecvf.com/content/CVPR2025/html/Chu_RaCFormer_Towards_High-Quality_3D_Object_Detection_via_Query-based_Radar-Camera_Fusion_CVPR_2025_paper.html) | CVPR 2025 · 主会 | 深度引导、目标查询、多普勒与历史雷达特征。 | [打开 PDF](zotero://open-pdf/library/items/6T89NSHF) |
+| 跟踪与状态估计 | [雷达–相机置信度融合跟踪](https://www.ieee-jas.net/en/article/doi/10.1109/JAS.2025.125405) | IEEE/CAA JAS 2025 · 期刊 | 时间对齐、存在性判断、匹配和融合状态估计。 | [打开 PDF](zotero://open-pdf/library/items/4Z922LUB) |
+| 三维身份关联 | [ADA-Track](https://openaccess.thecvf.com/content/CVPR2024/html/Ding_ADA-Track_End-to-End_Multi-Camera_3D_Multi-Object_Tracking_with_Alternating_Detection_and_CVPR_2024_paper.html) | CVPR 2024 · 主会 | 交替检测与关联；原始输入是多相机。 | [打开 PDF](zotero://open-pdf/library/items/RIWQSVRG) |
+| 多模态轨迹预测 | [MTR++](https://ieeexplore.ieee.org/abstract/document/10398503/) | TPAMI 2024 · 期刊 | 多目标交互和意图查询；不能把 MTR 仓库直接视作完整 MTR++ 实现。 | [打开 PDF](zotero://open-pdf/library/items/D55YTZTR) |
+| 预测鲁棒性 | [WAKE](https://ieeexplore.ieee.org/document/10839301) | TPAMI 2025 · 期刊 | 历史观测缺失与运动学约束，适合遮挡/漏检实验。 | [打开 PDF](zotero://open-pdf/library/items/AIATGJZL) |
+| 联合任务工程 | [SparseDrive](https://doi.org/10.1109/ICRA55743.2025.11128800) | ICRA 2025 · 主会 | 连接检测、跟踪、预测的实例表示；雷达扩展需另行验证。 | [打开 PDF](zotero://open-pdf/library/items/UC2Q4FEG) |
 
 ### 遇到具体问题再扩展
 
