@@ -1,6 +1,6 @@
 # 雷达–视觉融合目标跟踪与轨迹预测
 
-> 项目状态：准备阶段。本文整理研究问题、技术基础与候选文献；算法、实验结果和工程配置尚未建立。
+> 项目状态：准备阶段。本文整理研究问题、技术基础与已核验发表的代表性文献；算法、实验结果和工程配置尚未建立。
 
 ## 项目概述
 
@@ -10,7 +10,7 @@
 
 ## 背景与问题分析
 
-相机提供丰富的外观和语义信息，但单目图像的深度存在歧义，成像质量也会受光照和天气影响。毫米波雷达能够直接测量距离和**径向速度**，但返回点通常稀疏，可能含有杂波、虚警和多径反射。4D 成像雷达增加俯仰维观测，改善了三维定位能力，但仍不能把雷达点云简单当作激光雷达点云使用。[雷达–视觉融合综述](https://arxiv.org/abs/2406.00714)、[View-of-Delft 数据集论文](https://repository.tudelft.nl/record/uuid:663863c1-35b8-48a5-9bc7-e775df8d7fac)
+相机提供丰富的外观和语义信息，但单目图像的深度存在歧义，成像质量也会受光照和天气影响。毫米波雷达能够直接测量距离和**径向速度**，但返回点通常稀疏，可能含有杂波、虚警和多径反射。4D 成像雷达增加俯仰维观测，改善了三维定位能力，但仍不能把雷达点云简单当作激光雷达点云使用。[MSSF（T-ITS 2025）](https://doi.org/10.1109/TITS.2025.3554313)、[VoD 官方文档](https://github.com/tudelft-iv/view-of-delft-dataset)
 
 本项目将问题分成四个相互影响的环节：
 
@@ -42,11 +42,13 @@
 
 **雷达–视觉融合。** 现有工作包括点级/区域级关联、图像与雷达在 BEV 中融合，以及由目标查询从不同视角自适应采样。BEV 融合便于统一空间表示，但图像深度不准时可能把视觉特征放在错误位置；查询式与多阶段方法尝试在实例层面再次校正。[RCBEVDet](https://openaccess.thecvf.com/content/CVPR2024/html/Lin_RCBEVDet_Radar-camera_Fusion_in_Birds_Eye_View_for_3D_Object_CVPR_2024_paper.html)、[RaCFormer](https://openaccess.thecvf.com/content/CVPR2025/html/Chu_RaCFormer_Towards_High-Quality_3D_Object_Detection_via_Query-based_Radar-Camera_Fusion_CVPR_2025_paper.html)、[CVFusion](https://openaccess.thecvf.com/content/ICCV2025/html/Zhong_CVFusion_Cross-View_Fusion_of_4D_Radar_and_Camera_for_3D_ICCV_2025_paper.html)
 
-**跟踪。** 入门基线可采用“逐帧检测 → 运动滤波 → 数据关联”的流程，以量化漏检和身份切换。进一步可研究跨帧传播的目标查询，将检测和跟踪联系起来，并用雷达径向速度约束运动假设。遮挡恢复需要单独评估，不能只看总体检测精度。[UniAD](https://openaccess.thecvf.com/content/CVPR2023/html/Hu_Planning-Oriented_Autonomous_Driving_CVPR_2023_paper.html)
+**跟踪。** 先采用“逐帧检测 → 运动滤波 → 数据关联”建立可解释基线，借鉴雷达–相机置信度融合中的时间对齐、目标存在性判断与状态估计。再参考 ADA-Track 的交替检测与关联设计，研究如何加入雷达径向速度约束。原 ADA-Track 使用相机输入，雷达扩展需要本项目验证；遮挡恢复和身份切换应单独评估。[置信度融合跟踪（IEEE/CAA JAS 2025）](https://doi.org/10.1109/JAS.2025.125405)、[ADA-Track（CVPR 2024 主会）](https://openaccess.thecvf.com/content/CVPR2024/html/Ding_ADA-Track_End-to-End_Multi-Camera_3D_Multi-Object_Tracking_with_Alternating_Detection_and_CVPR_2024_paper.html)
 
-**轨迹预测。** 从匀速/匀加速外推与运动学模型起步，再引入历史轨迹、目标间交互和道路几何约束，预测多个未来假设。应明确区分“以真实历史框为输入”和“以模型检测/跟踪结果为输入”两种评测设置，后者才能反映上游误差的影响。[QCNet](https://openaccess.thecvf.com/content/CVPR2023/html/Zhou_Query-Centric_Trajectory_Prediction_CVPR_2023_paper.html)、[UniAD](https://openaccess.thecvf.com/content/CVPR2023/html/Hu_Planning-Oriented_Autonomous_Driving_CVPR_2023_paper.html)
+**轨迹预测。** 从匀速/匀加速外推与运动学模型起步，再引入历史轨迹、目标交互与道路几何约束。以 MTR++ 的多目标意图建模作为阅读主线，参考 WAKE 研究观测缺失与物理可行性。明确区分真实历史、模型估计历史和带噪/缺失历史三种输入，统一 1–3 秒预测时长与候选轨迹条数。[MTR++（TPAMI 2024）](https://doi.org/10.1109/TPAMI.2024.3352811)、[WAKE（TPAMI 2025）](https://doi.org/10.1109/TPAMI.2025.3529259)
 
-**不确定性与鲁棒性。** 可分别记录传感器观测质量、检测分数、跟踪状态协方差和轨迹概率，再检验它们与真实误差的关系。模态缺失、外参扰动、低照度和稀疏回波可作为受控实验条件。将这些不确定性显式传给预测模块，是值得验证的研究假设，而不是已完成的功能。[联合感知与预测综述](https://arxiv.org/abs/2412.14088)、[SpaRC-AD](https://arxiv.org/abs/2508.10567)
+**不确定性与鲁棒性。** 分别记录传感器观测质量、目标存在性、状态估计协方差和轨迹模式概率，检验它们与真实误差的关系。以模态缺失、外参扰动、低照度及稀疏回波构造受控条件；不把检测分数直接当作预测置信度。将上游不确定性传给预测仍是本项目待验证的研究假设。[联合感知与预测综述（T-ITS 2025）](https://doi.org/10.1109/TITS.2025.3607743)、[WAKE（TPAMI 2025）](https://doi.org/10.1109/TPAMI.2025.3529259)
+
+**联合建模。** 在模块化链路可评测后，参考 SparseDrive 的共享稀疏实例表示连接检测、跟踪与运动预测。其原始输入是相机；雷达如何接入可补读 SpaRC-AD，后者是正式 Workshop 论文，单列为工程参考。项目以周围目标轨迹预测为目标，不必同步实现自车规划。[SparseDrive（ICRA 2025 主会）](https://doi.org/10.1109/ICRA55743.2025.11128800)、[SpaRC-AD（ICCV Workshops 2025）](https://openaccess.thecvf.com/content/ICCV2025W/DriveX/papers/Wolters_SpaRC-AD_A_Baseline_for_Radar-Camera_Fusion_in_End-to-End_Autonomous_Driving_ICCVW_2025_paper.pdf)
 
 ### 建议的首轮实验
 
@@ -71,28 +73,55 @@
 | 数据集 | 适用性 | 使用前需要确认 |
 | --- | --- | --- |
 | [nuScenes](https://www.nuscenes.org/) | 相机、传统车载雷达、三维标注与跟踪/预测任务较完整，适合验证完整链路。 | 其雷达数据不能直接视作 4D 成像雷达数据；评测协议与传感器类型须单独说明。 |
-| [View-of-Delft (VoD)](https://repository.tudelft.nl/record/uuid:663863c1-35b8-48a5-9bc7-e775df8d7fac) | 包含同步的相机、激光雷达及具有俯仰和多普勒信息的雷达，适合 4D 雷达–视觉检测研究。 | 核实可用序列、跟踪标注及预测时长是否满足任务。 |
+| [View-of-Delft (VoD)](https://github.com/tudelft-iv/view-of-delft-dataset) | 包含同步的相机、激光雷达及具有俯仰和多普勒信息的雷达，适合 4D 雷达–视觉检测研究。 | 核实可用序列、跟踪标注及预测时长是否满足任务。 |
 | [TJ4DRadSet](https://github.com/TJRadarLab/TJ4DRadSet) | 4D 雷达与相机研究的候选数据，包含连续序列和跟踪 ID 描述。 | 官方仓库注明公开下载内容及其他模态的获取条件有限制；先核实实际可获得的数据。 |
+| [DSERT-RoLL（CVPR 2026）](https://openaccess.thecvf.com/content/CVPR2026/html/Cho_DSERT-RoLL_Robust_Multi-Modal_Perception_for_Diverse_Driving_Conditions_with_Stereo_CVPR_2026_paper.html) | 近期多天气与光照数据集，含 4D 雷达、相机、三维框、track ID 和里程计，可用于鲁棒性评测。 | 先核对可下载范围与连续标注长度；有 ID 不等于已提供目标轨迹预测协议。 |
 
-## 可能相关的论文
+## 已核验发表的代表性论文
 
-以下是**阅读候选**，按与本项目的关系排列；论文中的性能数字只在其自身数据集和协议下成立。
+**核验日期：2026-10-19；近三年窗口：2023-10-19 至 2026-10-19。** 下列正式版本均发表于 **2024–2026 年**，优先收录高水平期刊与强相关主会论文。期刊、主会、Workshop 分开标注；不收录仅有预印本且未完成正式发表核验的工作。原始技术若有更早预印本，不把正式出版年份误写为首次提出年份。
 
-| 方向 | 论文标题 | 阅读重点 |
+详细英文原题、出版证据、Zotero 占位、适用限制和调整记录见[项目论文库](论文库.md)。本轮无需为超期算法设置基础论文例外；VoD、TJ4DRadSet 等作为数据资源文档保留，不计入近期方法论文。
+
+### 主线必读
+
+| 方向 | 论文 | 正式发表 | 对项目的具体作用 |
+| --- | --- | --- | --- |
+| 任务框架 | [联合感知与预测综述](https://doi.org/10.1109/TITS.2025.3607743) | T-ITS 2025 · 期刊 | 确定检测、跟踪、预测的接口及误差传递问题。 |
+| 4D 融合检测 | [MSSF](https://ieeexplore.ieee.org/document/10947638/) | T-ITS 2025 · 期刊 | 多阶段点云–图像交互，直接对应 VoD/TJ4DRadSet。 |
+| 4D 融合检测 | [MLF-4DRCNet](https://www.sciencedirect.com/science/article/pii/S1566253526002563) | Information Fusion 2026 · 期刊 | 点、场景、候选框三级融合，作为近期强相关期刊对照。 |
+| 融合检测基线 | [RCBEVDet](https://openaccess.thecvf.com/content/CVPR2024/html/Lin_RCBEVDet_Radar-camera_Fusion_in_Birds_Eye_View_for_3D_Object_CVPR_2024_paper.html) | CVPR 2024 · 主会 | 雷达编码、RCS 与 BEV 对齐，适合建立检测对照。 |
+| 运动特征与融合 | [RaCFormer](https://openaccess.thecvf.com/content/CVPR2025/html/Chu_RaCFormer_Towards_High-Quality_3D_Object_Detection_via_Query-based_Radar-Camera_Fusion_CVPR_2025_paper.html) | CVPR 2025 · 主会 | 深度引导、目标查询、多普勒与历史雷达特征。 |
+| 跟踪与状态估计 | [雷达–相机置信度融合跟踪](https://www.ieee-jas.net/en/article/doi/10.1109/JAS.2025.125405) | IEEE/CAA JAS 2025 · 期刊 | 时间对齐、存在性判断、匹配和融合状态估计。 |
+| 三维身份关联 | [ADA-Track](https://openaccess.thecvf.com/content/CVPR2024/html/Ding_ADA-Track_End-to-End_Multi-Camera_3D_Multi-Object_Tracking_with_Alternating_Detection_and_CVPR_2024_paper.html) | CVPR 2024 · 主会 | 交替检测与关联；原始输入是多相机。 |
+| 多模态轨迹预测 | [MTR++](https://ieeexplore.ieee.org/abstract/document/10398503/) | TPAMI 2024 · 期刊 | 多目标交互和意图查询；不能把 MTR 仓库直接视作完整 MTR++ 实现。 |
+| 预测鲁棒性 | [WAKE](https://ieeexplore.ieee.org/document/10839301) | TPAMI 2025 · 期刊 | 历史观测缺失与运动学约束，适合遮挡/漏检实验。 |
+| 联合任务工程 | [SparseDrive](https://doi.org/10.1109/ICRA55743.2025.11128800) | ICRA 2025 · 主会 | 连接检测、跟踪、预测的实例表示；雷达扩展需另行验证。 |
+
+### 遇到具体问题再扩展
+
+| 论文 | 正式发表 | 阅读触发条件 |
 | --- | --- | --- |
-| 综述 | [A Survey of Deep Learning Based Radar and Vision Fusion for 3D Object Detection in Autonomous Driving](https://arxiv.org/abs/2406.00714)（2024） | 雷达–视觉融合方法分类与 4D 雷达背景。 |
-| 融合检测 | [RCBEVDet: Radar-camera Fusion in Bird's Eye View for 3D Object Detection](https://openaccess.thecvf.com/content/CVPR2024/html/Lin_RCBEVDet_Radar-camera_Fusion_in_Birds_Eye_View_for_3D_Object_CVPR_2024_paper.html)（CVPR 2024） | 雷达特征编码与 BEV 跨模态融合。 |
-| 融合检测 | [RaCFormer: Towards High-Quality 3D Object Detection via Query-based Radar-Camera Fusion](https://openaccess.thecvf.com/content/CVPR2025/html/Chu_RaCFormer_Towards_High-Quality_3D_Object_Detection_via_Query-based_Radar-Camera_Fusion_CVPR_2025_paper.html)（CVPR 2025） | 雷达引导深度估计、目标查询和跨视角采样。 |
-| 4D 融合检测 | [CVFusion: Cross-View Fusion of 4D Radar and Camera for 3D Object Detection](https://openaccess.thecvf.com/content/ICCV2025/html/Zhong_CVFusion_Cross-View_Fusion_of_4D_Radar_and_Camera_for_3D_ICCV_2025_paper.html)（ICCV 2025） | 场景级提议与实例级多视角校正。 |
-| 时序融合 | [RCTDistill: Cross-Modal Knowledge Distillation Framework for Radar-Camera 3D Object Detection with Temporal Fusion](https://openaccess.thecvf.com/content/ICCV2025/html/Bang_RCTDistill_Cross-Modal_Knowledge_Distillation_Framework_for_Radar-Camera_3D_Object_Detection_ICCV_2025_paper.html)（ICCV 2025） | 时序特征融合与跨模态蒸馏。 |
-| 联合感知与预测 | [Planning-Oriented Autonomous Driving](https://openaccess.thecvf.com/content/CVPR2023/html/Hu_Planning-Oriented_Autonomous_Driving_CVPR_2023_paper.html)（UniAD，CVPR 2023） | 目标查询如何连接跟踪、运动预测与规划。 |
-| 轨迹预测 | [Query-Centric Trajectory Prediction](https://openaccess.thecvf.com/content/CVPR2023/html/Zhou_Query-Centric_Trajectory_Prediction_CVPR_2023_paper.html)（QCNet，CVPR 2023） | 多模态轨迹生成与查询式解码。 |
-| 雷达融合全链路 | [SpaRC-AD: A Baseline for Radar-Camera Fusion in End-to-End Autonomous Driving](https://arxiv.org/abs/2508.10567)（arXiv 2025） | 雷达信息如何进入跟踪、运动预测和规划；注意其为预印本。 |
-| 联合任务综述 | [Joint Perception and Prediction for Autonomous Driving: A Survey](https://arxiv.org/abs/2412.14088)（arXiv 2024） | 感知误差传递、联合优化与评测问题。 |
+| [CVFusion](https://openaccess.thecvf.com/content/ICCV2025/html/Zhong_CVFusion_Cross-View_Fusion_of_4D_Radar_and_Camera_for_3D_ICCV_2025_paper.html) | ICCV 2025 主会 | 候选框不稳，需要实例级跨视角细化。 |
+| [R4Det](https://openaccess.thecvf.com/content/CVPR2026/html/Xia_R4Det_4D_Radar-Camera_Fusion_for_High-Performance_3D_Object_Detection_CVPR_2026_paper.html) | CVPR 2026 主会 | 位姿不准、时序对齐失败或小目标缺少雷达回波。 |
+| [RPGFusion](https://openaccess.thecvf.com/content/CVPR2026/html/Qiu_RPGFusion_4D_Radar_Prior-Guided_Multi-Modal_Fusion_for_3D_Detection_CVPR_2026_paper.html) | CVPR 2026 主会 | 需要研究雷达置信度/深度先验与 BEV 采样。 |
+| [RCTDistill](https://openaccess.thecvf.com/content/ICCV2025/html/Bang_RCTDistill_Cross-Modal_Knowledge_Distillation_Framework_for_Radar-Camera_3D_Object_Detection_ICCV_2025_paper.html) | ICCV 2025 主会 | 具备同步 LiDAR 训练数据，研究时序对齐与蒸馏。 |
+| [DSERT-RoLL](https://openaccess.thecvf.com/content/CVPR2026/html/Cho_DSERT-RoLL_Robust_Multi-Modal_Perception_for_Diverse_Driving_Conditions_with_Stereo_CVPR_2026_paper.html) | CVPR 2026 主会 | 需要真实天气、光照条件与连续 ID 标注。 |
+| [SpaRC-AD](https://openaccess.thecvf.com/content/ICCV2025W/DriveX/papers/Wolters_SpaRC-AD_A_Baseline_for_Radar-Camera_Fusion_in_End-to-End_Autonomous_Driving_ICCVW_2025_paper.pdf) | ICCV Workshops 2025 | 仅作雷达融合全链路补充；不属于主会或顶刊。 |
+
+### 建议执行顺序
+
+1. 读联合感知预测综述并核对数据集，先确认相机、雷达、连续 ID 与未来 1–3 秒标注是否可用。
+2. 用 RCBEVDet/MSSF 确定一个可复现的检测起点，对照 MLF-4DRCNet；完成纯视觉与融合的公平比较。
+3. 结合置信度融合跟踪和 ADA-Track，打通检测 → 跟踪 → 匀速外推，再定位身份和速度误差。
+4. 用 MTR++、WAKE 指导多模态预测与历史观测退化实验；把阅读价值与代码可复现性分开判断。
+5. 最后参考 RaCFormer、SparseDrive，验证雷达运动信息和共享表示是否改善全链路。扩展论文按失败案例选择。
+
+论文中的性能数字只在各自数据集和协议下成立；不将检测提升直接解释为跟踪或预测提升，也不把所有方法一次叠加。
 
 ## 当前进度
 
-- [x] 整理项目范围、背景、技术路线和候选文献。
+- [x] 整理项目范围、背景、技术路线和已核验发表的代表性文献（2026-10-19 更新）。
 - [ ] 确定数据集、任务边界和统一评测协议。
 - [ ] 实现数据读取、标定检查与可视化。
 - [ ] 复现检测、跟踪、预测基线。
