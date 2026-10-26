@@ -1,0 +1,168 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="2280" viewBox="0 0 1800 2280">
+<title>雷达–视觉融合目标跟踪与轨迹预测 项目技术路线图</title>
+<desc>规划路线：多源输入经过时空对齐、融合检测、跟踪状态估计与多模态预测；长尾场景挖掘形成反馈，统一评测验证改进。</desc>
+<rect width="1800" height="2280" fill="white"/>
+<text x="80" y="86.72" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="44" font-weight="700" text-anchor="start">雷达–视觉融合目标跟踪与轨迹预测</text>
+<text x="80" y="136.0" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="400" text-anchor="start">技术路线详解  /  沿实线读主流程：输入 → 编号步骤 → 输出；虚线表示实验反馈</text>
+<rect x="80" y="166" width="1640" height="82" rx="12" fill="#EDF4FA" stroke="#C5D7E8" stroke-width="2"/>
+<text x="106" y="210.88" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">研究目标</text>
+<text x="260" y="210.88" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="400" text-anchor="start">找到目标 → 持续认出同一目标 → 估计运动 → 预测未来 1–3 秒的可能轨迹</text>
+<text x="80" y="299.12" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="700" text-anchor="start">01</text>
+<text x="128" y="301.52" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="700" text-anchor="start">准备数据：先确认各传感器记录了什么</text>
+<rect x="80" y="330" width="520" height="120" rx="12" fill="#F8FAFC" stroke="#AAB8C7" stroke-width="2"/>
+<text x="104" y="370.76" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="700" text-anchor="start">4D 成像毫米波雷达</text>
+<text x="104" y="409.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">距离、方位、俯仰、径向速度</text>
+<text x="104" y="440.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">RCS：雷达散射截面，描述散射能力</text>
+<rect x="640" y="330" width="520" height="120" rx="12" fill="#F8FAFC" stroke="#AAB8C7" stroke-width="2"/>
+<text x="664" y="370.76" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="700" text-anchor="start">相机图像</text>
+<text x="664" y="409.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">目标外观、类别和场景线索</text>
+<text x="664" y="440.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">结合成像几何估计空间位置</text>
+<rect x="1200" y="330" width="520" height="120" rx="12" fill="#F8FAFC" stroke="#AAB8C7" stroke-width="2"/>
+<text x="1224" y="370.76" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="27" font-weight="700" text-anchor="start">时间、标定与自车位姿</text>
+<text x="1224" y="409.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">时间戳、传感器坐标关系</text>
+<text x="1224" y="440.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">自车位姿：车辆的位置与朝向</text>
+<line x1="340" y1="450" x2="340" y2="477" stroke="#2464A1" stroke-width="2"/>
+<line x1="900" y1="450" x2="900" y2="477" stroke="#2464A1" stroke-width="2"/>
+<line x1="1460" y1="450" x2="1460" y2="477" stroke="#2464A1" stroke-width="2"/>
+<line x1="340" y1="477" x2="1460" y2="477" stroke="#2464A1" stroke-width="2"/>
+<line x1="340" y1="477" x2="340" y2="546" stroke="#2464A1" stroke-width="3"/>
+<polygon points="340,546 334.78041359066526,535.1946347717678 345.21958640933474,535.1946347717678" fill="#2464A1"/>
+<text x="520" y="508.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">另备参考标注：用于训练与评分；未来真值不进入预测输入。</text>
+<text x="520" y="541.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">先固定训练 / 验证 / 测试划分，并核实连续 ID 与未来标注长度。</text>
+<rect x="80" y="555" width="520" height="870" rx="12" fill="#FFFFFF" stroke="#2464A1" stroke-width="2"/>
+<rect x="81" y="556" width="518" height="90" rx="10" fill="#EDF4FA" stroke="#EDF4FA" stroke-width="2"/>
+<text x="102" y="594.88" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">02</text>
+<text x="156" y="593.64" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700" text-anchor="start">时空对齐与融合感知</text>
+<text x="104" y="631.24" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">回答：目标是什么？现在在哪里？</text>
+<text x="104" y="694.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">输入：雷达点、图像、时间与标定</text>
+<line x1="104" y1="718" x2="576" y2="718" stroke="#D8E1EA" stroke-width="1"/>
+<text x="104" y="767.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">① 时空对齐：让观测对应起来</text>
+<text x="104" y="801.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">统一时刻与坐标；补偿自车运动。</text>
+<text x="104" y="857.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">② 雷达编码：提取空间与运动线索</text>
+<text x="104" y="891.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">利用点的位置、径向速度和 RCS。</text>
+<text x="104" y="947.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">③ 视觉编码：提取外观与深度线索</text>
+<text x="104" y="981.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">从图像提取特征，并估计深度。</text>
+<text x="104" y="1037.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">④ 融合检测：共同判断目标位置</text>
+<text x="104" y="1071.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">BEV＝鸟瞰视角；在统一空间融合。</text>
+<rect x="97" y="1125" width="486" height="116" rx="8" fill="#EDF4FA" stroke="#EDF4FA" stroke-width="2"/>
+<text x="110" y="1160.24" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">输出给下一环节</text>
+<text x="110" y="1194.36" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">三维目标框、类别、检测分数；</text>
+<text x="110" y="1224.36" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">按设计附带融合特征与观测质量。</text>
+<text x="104" y="1285.24" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">实施层次：先做基线，再验证改进</text>
+<text x="104" y="1324.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 先做：标定检查与纯视觉 / 融合对照。</text>
+<text x="104" y="1358.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 后续：外参漂移修正、稀疏点增强。</text>
+<text x="104" y="1392.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 后续：深度不确定性与跨帧融合。</text>
+<rect x="640" y="555" width="520" height="870" rx="12" fill="#FFFFFF" stroke="#2464A1" stroke-width="2"/>
+<rect x="641" y="556" width="518" height="90" rx="10" fill="#EDF4FA" stroke="#EDF4FA" stroke-width="2"/>
+<text x="662" y="594.88" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">03</text>
+<text x="716" y="593.64" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700" text-anchor="start">多目标跟踪与状态估计</text>
+<text x="664" y="631.24" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">回答：还是它吗？它正在怎样运动？</text>
+<text x="664" y="694.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">输入：当前检测 + 上一帧轨迹状态</text>
+<line x1="664" y1="718" x2="1136" y2="718" stroke="#D8E1EA" stroke-width="1"/>
+<text x="664" y="767.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">① 运动预测：估计本帧应出现在哪</text>
+<text x="664" y="801.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">用上一帧位置、速度外推当前状态。</text>
+<text x="664" y="857.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">② 数据关联：把检测接到已有轨迹</text>
+<text x="664" y="891.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">按位置等线索匹配，排除不合理配对。</text>
+<text x="664" y="947.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">③ 滤波更新：结合预测与本帧观测</text>
+<text x="664" y="981.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">修正位置、速度，记录估计误差范围。</text>
+<text x="664" y="1037.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">④ 身份维护：处理出现、遮挡和离开</text>
+<text x="664" y="1071.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">保留短时丢失轨迹；重现后尝试接续。</text>
+<rect x="657" y="1125" width="486" height="116" rx="8" fill="#EDF4FA" stroke="#EDF4FA" stroke-width="2"/>
+<text x="670" y="1160.24" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">输出给下一环节</text>
+<text x="670" y="1194.36" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">目标 ID、历史位置与速度；</text>
+<text x="670" y="1224.36" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">状态协方差：描述估计的不确定性。</text>
+<text x="664" y="1285.24" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">实施层次：先做基线，再验证改进</text>
+<text x="664" y="1324.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 先做：卡尔曼滤波 + 显式数据关联。</text>
+<text x="664" y="1358.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 后续：径向速度约束、遮挡恢复。</text>
+<text x="664" y="1392.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 后续：时序查询与检测跟踪联合。</text>
+<rect x="1200" y="555" width="520" height="870" rx="12" fill="#FFFFFF" stroke="#187D7C" stroke-width="2"/>
+<rect x="1201" y="556" width="518" height="90" rx="10" fill="#EDF7F5" stroke="#EDF7F5" stroke-width="2"/>
+<text x="1222" y="594.88" fill="#187D7C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">04</text>
+<text x="1276" y="593.64" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="28" font-weight="700" text-anchor="start">多模态轨迹预测</text>
+<text x="1224" y="631.24" fill="#187D7C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">回答：未来可能往哪里走？</text>
+<text x="1224" y="694.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">输入：历史状态 + 可用道路信息</text>
+<line x1="1224" y1="718" x2="1696" y2="718" stroke="#D8E1EA" stroke-width="1"/>
+<text x="1224" y="767.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">① 建立基线：先做简单运动外推</text>
+<text x="1224" y="801.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">匀速 / 匀加速预测，作为比较起点。</text>
+<text x="1224" y="857.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">② 编码上下文：理解运动与周围环境</text>
+<text x="1224" y="891.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">结合历史、其他目标和可用道路几何。</text>
+<text x="1224" y="947.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">③ 生成候选：给出多种合理未来</text>
+<text x="1224" y="981.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">预测未来 1–3 秒；为各条轨迹赋概率。</text>
+<text x="1224" y="1037.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">④ 检查可行性：是否符合运动规律</text>
+<text x="1224" y="1071.36" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">检查速度、加速度等是否合理。</text>
+<rect x="1217" y="1125" width="486" height="116" rx="8" fill="#EDF7F5" stroke="#EDF7F5" stroke-width="2"/>
+<text x="1230" y="1160.24" fill="#187D7C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">最终预测输出</text>
+<text x="1230" y="1194.36" fill="#187D7C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">K 条候选轨迹及对应模式概率；</text>
+<text x="1230" y="1224.36" fill="#187D7C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">多模态＝多种未来，例如直行 / 转弯。</text>
+<text x="1224" y="1285.24" fill="#187D7C" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="700" text-anchor="start">实施层次：先做基线，再验证改进</text>
+<text x="1224" y="1324.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 先做：固定时长、采样间隔与候选数。</text>
+<text x="1224" y="1358.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 后续：交互建模与多模态预测。</text>
+<text x="1224" y="1392.36" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="22" font-weight="400" text-anchor="start">• 后续：上游不确定性传播与概率校准。</text>
+<line x1="605" y1="1000" x2="635" y2="1000" stroke="#2464A1" stroke-width="3"/>
+<polygon points="635,1000 624.1946347717678,1005.2195864093347 624.1946347717678,994.7804135906653" fill="#2464A1"/>
+<line x1="1165" y1="1000" x2="1195" y2="1000" stroke="#187D7C" stroke-width="3"/>
+<polygon points="1195,1000 1184.1946347717678,1005.2195864093347 1184.1946347717678,994.7804135906653" fill="#187D7C"/>
+<text x="80" y="1496.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">读图提示：径向速度只是沿视线的速度分量；检测分数、状态协方差与轨迹模式概率不能混用。</text>
+<line x1="340" y1="1425" x2="340" y2="1450" stroke="#A86928" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="900" y1="1425" x2="900" y2="1450" stroke="#A86928" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="1460" y1="1425" x2="1460" y2="1450" stroke="#A86928" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="340" y1="1450" x2="1650" y2="1450" stroke="#A86928" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="1650" y1="1450" x2="1650" y2="1578" stroke="#A86928" stroke-width="3" stroke-dasharray="8 7"/>
+<polygon points="1650,1578 1644.7804135906651,1567.1946347717678 1655.2195864093349,1567.1946347717678" fill="#A86928"/>
+<text x="80" y="1556.12" fill="#A86928" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="700" text-anchor="start">05</text>
+<text x="128" y="1558.52" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="700" text-anchor="start">长尾与鲁棒性：找出失败条件，再针对性改进</text>
+<rect x="80" y="1585" width="1640" height="205" rx="12" fill="#FBF7F0" stroke="#D7BE9B" stroke-width="2"/>
+<text x="105" y="1627.0" fill="#A86928" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">① 找难例：哪些情况下会失败？</text>
+<text x="105" y="1675.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">检查夜间、雨雾、逆光、遮挡与切入。</text>
+<text x="105" y="1712.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">结合误差、模态不一致与轨迹异常，</text>
+<text x="105" y="1749.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">整理少见但重要的失败片段。</text>
+<text x="655" y="1627.0" fill="#A86928" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">② 做实验：问题来自哪个环节？</text>
+<text x="655" y="1675.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">分别模拟缺失模态、稀疏雷达回波，</text>
+<text x="655" y="1712.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">或加入标定扰动，观察性能变化。</text>
+<text x="655" y="1749.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">真实天气与人为扰动分开报告。</text>
+<text x="1205" y="1627.0" fill="#A86928" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">③ 再改进：补数据或改模型</text>
+<text x="1205" y="1675.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">用训练 / 验证难例指导数据补充。</text>
+<text x="1205" y="1712.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">后续研究未知类别识别与保守跟踪。</text>
+<text x="1205" y="1749.24" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">固定测试集，不让测试样本回流训练。</text>
+<line x1="900" y1="1790" x2="900" y2="1860" stroke="#2464A1" stroke-width="3"/>
+<polygon points="900,1860 894.7804135906653,1849.1946347717678 905.2195864093347,1849.1946347717678" fill="#2464A1"/>
+<text x="80" y="1839.12" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="24" font-weight="700" text-anchor="start">06</text>
+<text x="128" y="1841.52" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="29" font-weight="700" text-anchor="start">统一评测：结果更准了吗？改善来自哪里？</text>
+<rect x="80" y="1868" width="1640" height="180" rx="12" fill="#F7F9FC" stroke="#CBD5E1" stroke-width="2"/>
+<text x="105" y="1908.88" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">检测与跟踪</text>
+<text x="105" y="1952.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">mAP：检测准确性；同时关注漏检。</text>
+<text x="105" y="1986.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">AMOTA：综合跟踪表现。</text>
+<text x="105" y="2020.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">ID 切换：是否把同一目标认错。</text>
+<text x="655" y="1908.88" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">轨迹与概率质量</text>
+<text x="655" y="1952.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">minADE / minFDE：最佳候选轨迹的</text>
+<text x="655" y="1986.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">平均 / 终点误差；固定候选数与时长。</text>
+<text x="655" y="2020.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">概率校准：把握程度是否符合实际。</text>
+<text x="1205" y="1908.88" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">对照与消融</text>
+<text x="1205" y="1952.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">纯视觉 vs 雷达–视觉：融合有用吗？</text>
+<text x="1205" y="1986.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">每次只改一项：收益来自哪个模块？</text>
+<text x="1205" y="2020.24" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">按场景分组，并报告样本量与波动。</text>
+<line x1="80" y1="1980" x2="36" y2="1980" stroke="#A86928" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="36" y1="1980" x2="36" y2="1000" stroke="#A86928" stroke-width="2" stroke-dasharray="8 7"/>
+<line x1="36" y1="1000" x2="77" y2="1000" stroke="#A86928" stroke-width="3" stroke-dasharray="8 7"/>
+<polygon points="77,1000 66.19463477176788,1005.2195864093347 66.19463477176788,994.7804135906653" fill="#A86928"/>
+<text x="80" y="2090.24" fill="#A86928" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="23" font-weight="400" text-anchor="start">虚线反馈：根据评测定位问题，回到相关模块修改并重新比较；所有研究改进均需实验验证。</text>
+<text x="80" y="2142.88" fill="#182C45" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="26" font-weight="700" text-anchor="start">实施顺序</text>
+<rect x="80" y="2165" width="380" height="82" rx="8" fill="#FFFFFF" stroke="#CAD5E1" stroke-width="2"/>
+<text x="98" y="2199.0" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">先对齐数据</text>
+<text x="98" y="2233.48" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" text-anchor="start">投影检查、序列与标注核验</text>
+<line x1="465" y1="2205" x2="494" y2="2205" stroke="#2464A1" stroke-width="3"/>
+<polygon points="494,2205 483.1946347717679,2210.2195864093346 483.1946347717679,2199.7804135906654" fill="#2464A1"/>
+<rect x="500" y="2165" width="380" height="82" rx="8" fill="#FFFFFF" stroke="#CAD5E1" stroke-width="2"/>
+<text x="518" y="2199.0" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">再跑通基线</text>
+<text x="518" y="2233.48" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" text-anchor="start">检测 → 跟踪 → 匀速预测</text>
+<line x1="885" y1="2205" x2="914" y2="2205" stroke="#2464A1" stroke-width="3"/>
+<polygon points="914,2205 903.1946347717678,2210.2195864093346 903.1946347717678,2199.7804135906654" fill="#2464A1"/>
+<rect x="920" y="2165" width="380" height="82" rx="8" fill="#FFFFFF" stroke="#CAD5E1" stroke-width="2"/>
+<text x="938" y="2199.0" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">逐项增加改进</text>
+<text x="938" y="2233.48" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" text-anchor="start">融合、遮挡、多模态与校准</text>
+<line x1="1305" y1="2205" x2="1334" y2="2205" stroke="#2464A1" stroke-width="3"/>
+<polygon points="1334,2205 1323.1946347717678,2210.2195864093346 1323.1946347717678,2199.7804135906654" fill="#2464A1"/>
+<rect x="1340" y="2165" width="380" height="82" rx="8" fill="#FFFFFF" stroke="#CAD5E1" stroke-width="2"/>
+<text x="1358" y="2199.0" fill="#2464A1" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="25" font-weight="700" text-anchor="start">最后联合验证</text>
+<text x="1358" y="2233.48" fill="#54657A" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif" font-size="21" font-weight="400" text-anchor="start">共享表示、长尾与原型评测</text>
+</svg>

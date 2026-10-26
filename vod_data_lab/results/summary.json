@@ -1,0 +1,180 @@
+{
+  "source": "D:\\研究生\\项目\\02-rv-track-pred\\数据集\\view-of-delft-dataset-main\\view-of-delft-dataset-main\\example_set",
+  "frames": [
+    {
+      "frame": "00549",
+      "image_wh": [
+        1936,
+        1216
+      ],
+      "radar_points": 322,
+      "radar_projected_in_image": 273,
+      "radar_points_in_model": 322,
+      "radar_points_dropped_by_cap": 0,
+      "radar_time_ids": {
+        "0": 322
+      },
+      "lidar_points": 167772,
+      "labels": 15,
+      "classes": {
+        "bicycle": 6,
+        "bicycle_rack": 1,
+        "moped_scooter": 2,
+        "pedestrian": 3,
+        "rider": 3
+      },
+      "radar_bev_occupied_cells": 215,
+      "pose_keys": [
+        "UTMToCamera",
+        "mapToCamera",
+        "odomToCamera"
+      ],
+      "model_image_chw": [
+        3,
+        304,
+        484
+      ],
+      "model_radar_features": [
+        512,
+        7
+      ],
+      "model_fused_features": [
+        512,
+        10
+      ],
+      "model_feature_order": [
+        "x_lidar_m",
+        "y_lidar_m",
+        "z_lidar_m",
+        "RCS",
+        "v_r",
+        "v_r_compensated",
+        "time_id"
+      ],
+      "fused_extra_features": [
+        "sampled_R_0to1",
+        "sampled_G_0to1",
+        "sampled_B_0to1"
+      ]
+    },
+    {
+      "frame": "01047",
+      "image_wh": [
+        1936,
+        1216
+      ],
+      "radar_points": 352,
+      "radar_projected_in_image": 295,
+      "radar_points_in_model": 352,
+      "radar_points_dropped_by_cap": 0,
+      "radar_time_ids": {
+        "0": 352
+      },
+      "lidar_points": 189088,
+      "labels": 24,
+      "classes": {
+        "bicycle": 11,
+        "bicycle_rack": 1,
+        "car": 1,
+        "moped_scooter": 1,
+        "pedestrian": 6,
+        "rider": 4
+      },
+      "radar_bev_occupied_cells": 206,
+      "pose_keys": [
+        "UTMToCamera",
+        "mapToCamera",
+        "odomToCamera"
+      ],
+      "model_image_chw": [
+        3,
+        304,
+        484
+      ],
+      "model_radar_features": [
+        512,
+        7
+      ],
+      "model_fused_features": [
+        512,
+        10
+      ],
+      "model_feature_order": [
+        "x_lidar_m",
+        "y_lidar_m",
+        "z_lidar_m",
+        "RCS",
+        "v_r",
+        "v_r_compensated",
+        "time_id"
+      ],
+      "fused_extra_features": [
+        "sampled_R_0to1",
+        "sampled_G_0to1",
+        "sampled_B_0to1"
+      ]
+    },
+    {
+      "frame": "01201",
+      "image_wh": [
+        1936,
+        1216
+      ],
+      "radar_points": 242,
+      "radar_projected_in_image": 206,
+      "radar_points_in_model": 242,
+      "radar_points_dropped_by_cap": 0,
+      "radar_time_ids": {
+        "0": 242
+      },
+      "lidar_points": 182450,
+      "labels": 23,
+      "classes": {
+        "bicycle": 6,
+        "bicycle_rack": 6,
+        "moped_scooter": 2,
+        "pedestrian": 7,
+        "rider": 2
+      },
+      "radar_bev_occupied_cells": 192,
+      "pose_keys": [
+        "UTMToCamera",
+        "mapToCamera",
+        "odomToCamera"
+      ],
+      "model_image_chw": [
+        3,
+        304,
+        484
+      ],
+      "model_radar_features": [
+        512,
+        7
+      ],
+      "model_fused_features": [
+        512,
+        10
+      ],
+      "model_feature_order": [
+        "x_lidar_m",
+        "y_lidar_m",
+        "z_lidar_m",
+        "RCS",
+        "v_r",
+        "v_r_compensated",
+        "time_id"
+      ],
+      "fused_extra_features": [
+        "sampled_R_0to1",
+        "sampled_G_0to1",
+        "sampled_B_0to1"
+      ]
+    }
+  ],
+  "cross_frame_object_id_overlaps": {
+    "00549-01047": 0,
+    "00549-01201": 0,
+    "01047-01201": 0
+  },
+  "note": "Sparse nonadjacent examples; no measured frame delta or tracking/prediction metric."
+}
