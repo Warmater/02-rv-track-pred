@@ -1,6 +1,6 @@
 # VoD 三帧数据处理实验
 
-本目录是一个**教学用、可复现的单帧数据管线**。原始数据仍放在 `../数据集/.../example_set`，这里保存代码和生成结果。它完成读取、标定检查、雷达投影、雷达 BEV、模型输入打包和一个最简单的点到像素融合示例；没有训练检测器，也没有把三张稀疏样例伪装成连续跟踪序列。
+本目录是一个**教学用、可复现的单帧雷达+相机数据管线**。原始数据仍放在 `../数据集/.../example_set`，这里保存代码和生成结果。它完成读取、标定检查、雷达投影、雷达 BEV、模型输入打包和一个最简单的点到像素融合示例；不读取 LiDAR 点云作为模型输入，没有训练检测器，也没有把三张稀疏样例伪装成连续跟踪序列。
 
 ## 1. 环境与运行
 
@@ -14,7 +14,7 @@ python -m pip install -r vod_data_lab/requirements.txt
 python vod_data_lab/preprocess.py
 ```
 
-从项目根目录执行。也可直接使用已装好 NumPy/Pillow 的 Python。当前机器的系统 Python 是 3.12.7，NumPy 2.2.6；其旧版 Matplotlib 与 NumPy 2 不兼容，所以本实验特意不用 Matplotlib。`--data` 可指定同样 `radar/training`、`lidar/training` 布局的数据目录，`--frames 00549 01047` 可选帧，`--output` 可换输出目录，`--max-points` 可改变模型输入最大雷达点数。
+从项目根目录执行。也可直接使用已装好 NumPy/Pillow 的 Python。当前机器的系统 Python 是 3.12.7，NumPy 2.2.6；其旧版 Matplotlib 与 NumPy 2 不兼容，所以本实验特意不用 Matplotlib。`--data` 可指定含 `radar/training` 的数据目录；`lidar/training`、位姿和标注文件可缺省，只会少画真值。`--frames 00549 01047` 可选帧，`--output` 可换输出目录，`--max-points` 可改变模型输入最大雷达点数。
 
 输出位于 [`results/`](results/)：每帧一张图像叠加图、一张雷达 BEV 图、一个 `.npz` 模型输入包，以及总体 [`summary.json`](results/summary.json)。重跑会覆盖同名实验输出。原始样例不会修改。
 
@@ -26,21 +26,22 @@ python vod_data_lab/preprocess.py
 | --- | --- | --- |
 | `radar/training/image_2/ID.jpg` | 1936×1216 RGB 图像 | 视觉观察、模型图像输入、投影底图 |
 | `radar/training/velodyne/ID.bin` | little-endian float32，`N×7` | `[x,y,z,RCS,v_r,v_r_compensated,time_id]`，原坐标为雷达系 |
-| `lidar/training/velodyne/ID.bin` | float32，`N×4` | `[x,y,z,reflectance]`，本例只检查数量；LiDAR 可作训练辅助/几何参照，不应悄悄作为雷达+相机推理输入 |
-| `radar/lidar/training/calib/ID.txt` | `P2`、`R0_rect`、`Tr_velo_to_cam` | 把各自传感器坐标变到校正相机坐标，然后投影到像素；名称 `velo` 沿用 KITTI，雷达目录中的它指**雷达到相机** |
+| `lidar/training/velodyne/ID.bin` | float32，`N×4` | **本实验不读取**，不是项目雷达+相机推理输入；VoD 提供它主要便于标注、研究对照或训练辅助 |
+| `radar/training/calib/ID.txt` | `P2`、`R0_rect`、`Tr_velo_to_cam` | 雷达到相机的外参及相机投影；名称 `velo` 沿用 KITTI，此处指**雷达** |
+| `lidar/training/calib/ID.txt` | 相机到 LiDAR 的坐标关系 | **可选，仅在显示真值标注时使用**，把原本在 LiDAR 坐标系的标注中心转到雷达坐标系；不进入推理输入包 |
 | `radar/training/pose/ID.json` | 三个 4×4 位姿 | 相机到 odom/map/UTM 的变换；连续帧运动补偿和世界轨迹需用它们，单帧投影不需 |
 | `radar/training/label_2/ID.json` | 每物体类别、3D 尺寸/中心/朝向、`objectId`、遮挡属性 | 训练监督、分析和 BEV 黄圈；样例 JSON 的 3D 中心是 LiDAR 坐标 |
-| `lidar/training/label_2/ID.txt` | KITTI 风格标签 | 叠加图绿框；其 2D 框由 3D 框投影自动生成，不是人工画的像素框 |
+| `lidar/training/label_2/ID.txt` | KITTI 风格**真值标签** | 仅画叠加图绿框；这是标注文件，不是 LiDAR 点云。其 2D 框由 3D 框投影自动生成 |
 
 雷达的 `v_r` 是**相对雷达视线方向**的速度，`v_r_compensated` 是补偿自车运动后的径向速度，仍非完整平面速度 `(v_x,v_y)`。`time_id=0` 是当前扫描，负值表示多扫描累计中的较早扫描；这三个样例全部为 0，属于单扫描数据。RCS 是回波强度相关量，不是类别概率。
 
 ## 3. 代码逐步做了什么
 
-1. 用 `float32` 和 7/4 列数读二进制，检查能整除且没有 NaN/Inf。读 JPEG、标定、位姿、两套标注。
+1. 用 `float32` 和 7 列数读**雷达**二进制，检查能整除且没有 NaN/Inf。读 JPEG、雷达标定；若存在，再读位姿及仅供检查/画图的真值标注。LiDAR `.bin` 不读取。
 2. 组合 `T_camera_radar = R0_rect × Tr_velo_to_cam`。对雷达点 `[x,y,z,1]` 变换到相机系，要求正深度，再用 `P2` 投影 `u=uvw[0]/uvw[2]`、`v=uvw[1]/uvw[2]`，检查像素落在图像内。越界点不强行采样颜色。
-3. 用 `T_lidar_radar = inverse(T_camera_lidar) × T_camera_radar` 把雷达点变到 LiDAR 系，统一到车体附近的地面平面。以 `x∈[0,50)m`、`y∈[-25,25)m`、0.25 m 网格统计雷达点数。此处是**雷达 BEV**，还不是已学得的相机 BEV。
+3. 直接在**雷达坐标系**以 `x∈[0,50)m`、`y∈[-25,25)m`、0.25 m 网格统计雷达点数。若有真值和 LiDAR 标定，才把 JSON 标注中心变换到雷达坐标系、画出黄圈。此处是**雷达 BEV**，还不是已学得的相机 BEV。
 4. 画图：叠加图的彩色圆点是雷达投影、绿色矩形是投影得到的标注框；雷达 BEV 中青色格子是回波，黄色圆圈是标注中心。图仅供肉眼核对对齐，不是精度指标。
-5. 缩小图像到 `484×304`，按相同比例缩放投影矩阵与 `uv`，生成 `CHW uint8` 图像张量。雷达特征在 LiDAR 坐标系中打包为 `512×7 float32`，不足处补零并给 `radar_point_mask`；`radar_in_image_mask` 说明哪些点能取视觉特征。超过上限时均匀抽取，数量记入报告；正式训练应验证采样策略是否丢掉小目标。
+5. 缩小图像到 `484×304`，按相同比例缩放投影矩阵与 `uv`，生成 `CHW uint8` 图像张量。雷达特征保留在**雷达坐标系**，打包为 `512×7 float32`，不足处补零并给 `radar_point_mask`；`radar_in_image_mask` 说明哪些点能取视觉特征。超过上限时均匀抽取，数量记入报告；正式训练应验证采样策略是否丢掉小目标。
 6. 作为**可执行的最小融合例子**，在有效投影位置读取原图 RGB（归一到 0–1），附加到 7 维雷达特征，得到 `fused_radar_rgb: 512×10`。这证明两模态如何通过几何关系接在同一个点上，但原始 RGB 不是强大的视觉编码器，投影点也可能落在遮挡物/背景上。
 
 读取打包结果：
@@ -50,7 +51,7 @@ import numpy as np
 
 x = np.load("vod_data_lab/results/00549_model_input.npz")
 image = x["image_chw"]                         # (3, 304, 484), uint8
-radar = x["radar_lidar_features"]               # (512, 7), float32
+radar = x["radar_features"]                     # (512, 7), float32；xyz 在雷达系
 fused = x["fused_radar_rgb"]                    # (512, 10), float32
 point_mask = x["radar_point_mask"]              # (512,), bool
 pixel_mask = x["radar_in_image_mask"]           # (512,), bool
@@ -59,7 +60,11 @@ valid_fused_points = fused[point_mask & pixel_mask]
 print(image.shape, radar[point_mask].shape, valid_fused_points.shape)
 ```
 
-`npz` 只含观测及标定，**不含真值标签**，防止推理阶段泄漏答案。训练时另从 `label_2` 读取类别、3D 框和 objectId，统一类别定义和坐标系后配对监督。不要把 `radar_bev_count` 与 `fused_radar_rgb` 误当成已训练模型的预测。
+`npz` 只含雷达、相机观测及**雷达到相机的标定**，**不含 LiDAR 点云、LiDAR 标定或真值标签**，防止推理阶段依赖不该有的信息。训练时另从 `label_2` 读取类别、3D 框和 objectId，把真值转换到约定的雷达/相机坐标系后配对监督。不要把 `radar_bev_count` 与 `fused_radar_rgb` 误当成已训练模型的预测。
+
+### LiDAR 到底需不需要？
+
+**项目最终模型不需要。** 推理链路是雷达点云 + 相机图像 + 两者标定，时序模型再加时间戳和自车位姿。VoD 同时提供 LiDAR，是数据集的额外模态；其官方同步以 LiDAR 为主时钟，3D 真值常以 LiDAR 坐标表达。这些是**数据组织与标注坐标**，不等于我们必须把 LiDAR 点云送入模型。可选择在训练期用 LiDAR 做标注辅助或教师蒸馏，但必须单独声明为训练特权信息，并保证验证/测试推理没有 LiDAR 依赖。当前脚本已用只有雷达图像、雷达 bin 和雷达标定的目录做过运行检查。
 
 ## 4. 后续怎样输入模型、怎样融合
 

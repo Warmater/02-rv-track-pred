@@ -124,7 +124,7 @@ def save_overlay(image: Image.Image, uv: np.ndarray, valid: np.ndarray, radar: n
     view.save(path)
 
 
-def save_bev(counts: np.ndarray, labels: list[dict], path: Path) -> None:
+def save_bev(counts: np.ndarray, label_centers_radar: np.ndarray, path: Path) -> None:
     # Image rows go from far to near; image columns from negative y to positive y.
     heat = np.minimum(counts.astype(np.float32) * 95, 255).astype(np.uint8)
     rgb = np.zeros((*heat.shape, 3), dtype=np.uint8)
@@ -139,9 +139,7 @@ def save_bev(counts: np.ndarray, labels: list[dict], path: Path) -> None:
         px = int((metre + 25) / 50 * 799)
         draw.line((px, 0, px, 799), fill=(38, 38, 38), width=1)
         draw.text((px + 3, 3), f"y={metre}m", fill=(180, 180, 180))
-    for obj in labels:
-        c = obj["geometry"]["center"]  # JSON centers are in LiDAR xyz
-        x, y = c["x"], c["y"]
+    for x, y, _ in label_centers_radar:
         if BEV_X[0] <= x < BEV_X[1] and BEV_Y[0] <= y < BEV_Y[1]:
             px = (y - BEV_Y[0]) / (BEV_Y[1] - BEV_Y[0]) * 800
             py = (BEV_X[1] - x) / (BEV_X[1] - BEV_X[0]) * 800
@@ -160,25 +158,33 @@ def process(data: Path, output: Path, ids: tuple[str, ...], max_points: int = MA
         lidar_root = data / "lidar" / "training"
         image = Image.open(radar_root / "image_2" / f"{frame_id}.jpg").convert("RGB")
         radar = load_bin(radar_root / "velodyne" / f"{frame_id}.bin", 7)
-        lidar = load_bin(lidar_root / "velodyne" / f"{frame_id}.bin", 4)
         p, t_cam_radar = load_calib(radar_root / "calib" / f"{frame_id}.txt")
-        _, t_cam_lidar = load_calib(lidar_root / "calib" / f"{frame_id}.txt")
-        pose = load_pose(radar_root / "pose" / f"{frame_id}.json")
-        labels = load_labels(radar_root / "label_2" / f"{frame_id}.json")
-        boxes = load_kitti_boxes(lidar_root / "label_2" / f"{frame_id}.txt")
-        if not np.allclose(p[:, :3], load_calib(lidar_root / "calib" / f"{frame_id}.txt")[0][:, :3]):
-            raise ValueError(f"{frame_id}: camera intrinsics disagree")
+        pose_path = radar_root / "pose" / f"{frame_id}.json"
+        label_path = radar_root / "label_2" / f"{frame_id}.json"
+        box_path = lidar_root / "label_2" / f"{frame_id}.txt"
+        lidar_calib_path = lidar_root / "calib" / f"{frame_id}.txt"
+        pose = load_pose(pose_path) if pose_path.exists() else {}
+        labels = load_labels(label_path) if label_path.exists() else []
+        boxes = load_kitti_boxes(box_path) if box_path.exists() else []
         if not np.allclose(t_cam_radar[:3, :3].T @ t_cam_radar[:3, :3], np.eye(3), atol=1e-3):
             raise ValueError(f"{frame_id}: radar rotation is not orthogonal")
         radar_cam = transform(radar[:, :3], t_cam_radar)
         uv, valid = project(radar_cam, p, image.size)
-        t_lidar_radar = np.linalg.inv(t_cam_lidar) @ t_cam_radar
-        radar_lidar = transform(radar[:, :3], t_lidar_radar)
-        counts = bev_counts(radar_lidar)
+        counts = bev_counts(radar[:, :3])
+        label_centers_radar = np.empty((0, 3), dtype=np.float64)
+        if labels and lidar_calib_path.exists():
+            # Optional GT visualization only. Inference input needs no LiDAR files.
+            _, t_cam_lidar = load_calib(lidar_calib_path)
+            label_centers_lidar = np.asarray([
+                [obj["geometry"]["center"][k] for k in ("x", "y", "z")]
+                for obj in labels
+            ], dtype=np.float64).reshape(-1, 3)
+            t_radar_lidar = np.linalg.inv(t_cam_radar) @ t_cam_lidar
+            label_centers_radar = transform(label_centers_lidar, t_radar_lidar)
         save_overlay(image, uv, valid, radar, boxes, output / f"{frame_id}_overlay.png")
-        save_bev(counts, labels, output / f"{frame_id}_radar_bev.png")
+        save_bev(counts, label_centers_radar, output / f"{frame_id}_radar_bev.png")
 
-        # Model-ready example: image CHW, unnormalized uint8; sparse radar in LiDAR xyz.
+        # Model-ready example: image CHW, unnormalized uint8; sparse radar in radar xyz.
         # A learned fusion model can encode image/radar separately, then sample camera
         # features at uv_full and fuse via concat/attention in one common coordinate frame.
         small = image.resize(TARGET_SIZE, Image.Resampling.BILINEAR)
@@ -189,7 +195,7 @@ def process(data: Path, output: Path, ids: tuple[str, ...], max_points: int = MA
         pixel_mask = np.zeros(max_points, dtype=bool)
         n = min(len(radar), max_points)
         chosen = np.linspace(0, len(radar) - 1, n, dtype=np.int64) if n else np.empty(0, dtype=np.int64)
-        features[:n, :3] = radar_lidar[chosen].astype(np.float32)
+        features[:n, :3] = radar[chosen, :3]
         features[:n, 3:] = radar[chosen, 3:7]
         uv_scaled[:n] = np.nan_to_num(uv[chosen] * np.array(TARGET_SIZE) / np.array(image.size), nan=0).astype(np.float32)
         point_mask[:n] = True
@@ -210,12 +216,11 @@ def process(data: Path, output: Path, ids: tuple[str, ...], max_points: int = MA
         p_small[1] *= TARGET_SIZE[1] / image.height
         np.savez_compressed(
             output / f"{frame_id}_model_input.npz",
-            image_chw=image_chw, radar_lidar_features=features,
+            image_chw=image_chw, radar_features=features,
             fused_radar_rgb=fused,
             radar_point_mask=point_mask, radar_uv=uv_scaled, radar_in_image_mask=pixel_mask,
             projection_resized=p_small.astype(np.float32),
             T_camera_radar=t_cam_radar.astype(np.float32),
-            T_camera_lidar=t_cam_lidar.astype(np.float32),
             radar_bev_count=counts,
         )
         id_sets[frame_id] = {o["objectId"] for o in labels}
@@ -224,13 +229,14 @@ def process(data: Path, output: Path, ids: tuple[str, ...], max_points: int = MA
             "radar_points": len(radar), "radar_projected_in_image": int(valid.sum()),
             "radar_points_in_model": n, "radar_points_dropped_by_cap": len(radar) - n,
             "radar_time_ids": dict(sorted(Counter(str(int(x)) for x in radar[:, 6]).items())),
-            "lidar_points": len(lidar), "labels": len(labels),
+            "labels": len(labels),
+            "ground_truth_overlay_available": bool(boxes or len(label_centers_radar)),
             "classes": dict(sorted(Counter(o["className"] for o in labels).items())),
             "radar_bev_occupied_cells": int((counts > 0).sum()),
             "pose_keys": sorted(pose), "model_image_chw": list(image_chw.shape),
             "model_radar_features": list(features.shape), "model_fused_features": list(fused.shape),
             "model_feature_order":
-                ["x_lidar_m", "y_lidar_m", "z_lidar_m", "RCS", "v_r", "v_r_compensated", "time_id"],
+                ["x_radar_m", "y_radar_m", "z_radar_m", "RCS", "v_r", "v_r_compensated", "time_id"],
             "fused_extra_features": ["sampled_R_0to1", "sampled_G_0to1", "sampled_B_0to1"],
         }
         summaries.append(summary)

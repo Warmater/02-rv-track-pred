@@ -14,8 +14,8 @@
       "radar_time_ids": {
         "0": 322
       },
-      "lidar_points": 167772,
       "labels": 15,
+      "ground_truth_overlay_available": true,
       "classes": {
         "bicycle": 6,
         "bicycle_rack": 1,
@@ -23,7 +23,7 @@
         "pedestrian": 3,
         "rider": 3
       },
-      "radar_bev_occupied_cells": 215,
+      "radar_bev_occupied_cells": 222,
       "pose_keys": [
         "UTMToCamera",
         "mapToCamera",
@@ -43,9 +43,9 @@
         10
       ],
       "model_feature_order": [
-        "x_lidar_m",
-        "y_lidar_m",
-        "z_lidar_m",
+        "x_radar_m",
+        "y_radar_m",
+        "z_radar_m",
         "RCS",
         "v_r",
         "v_r_compensated",
@@ -70,8 +70,8 @@
       "radar_time_ids": {
         "0": 352
       },
-      "lidar_points": 189088,
       "labels": 24,
+      "ground_truth_overlay_available": true,
       "classes": {
         "bicycle": 11,
         "bicycle_rack": 1,
@@ -80,7 +80,7 @@
         "pedestrian": 6,
         "rider": 4
       },
-      "radar_bev_occupied_cells": 206,
+      "radar_bev_occupied_cells": 210,
       "pose_keys": [
         "UTMToCamera",
         "mapToCamera",
@@ -100,9 +100,9 @@
         10
       ],
       "model_feature_order": [
-        "x_lidar_m",
-        "y_lidar_m",
-        "z_lidar_m",
+        "x_radar_m",
+        "y_radar_m",
+        "z_radar_m",
         "RCS",
         "v_r",
         "v_r_compensated",
@@ -127,8 +127,8 @@
       "radar_time_ids": {
         "0": 242
       },
-      "lidar_points": 182450,
       "labels": 23,
+      "ground_truth_overlay_available": true,
       "classes": {
         "bicycle": 6,
         "bicycle_rack": 6,
@@ -136,7 +136,7 @@
         "pedestrian": 7,
         "rider": 2
       },
-      "radar_bev_occupied_cells": 192,
+      "radar_bev_occupied_cells": 200,
       "pose_keys": [
         "UTMToCamera",
         "mapToCamera",
@@ -156,9 +156,9 @@
         10
       ],
       "model_feature_order": [
-        "x_lidar_m",
-        "y_lidar_m",
-        "z_lidar_m",
+        "x_radar_m",
+        "y_radar_m",
+        "z_radar_m",
         "RCS",
         "v_r",
         "v_r_compensated",
